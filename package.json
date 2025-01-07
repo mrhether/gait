@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "bin": {
-    "gait": "./dist/index.js"
+    "gait": "./dist/index.cjs"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
