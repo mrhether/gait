@@ -4,8 +4,13 @@ import { program } from "commander";
 import { generateCommitMessage } from "./generateCommit";
 import { createPR } from "./createPR";
 import { hasStagedChanges, commitChanges, pushBranch } from "./gitUtils";
+import { execSync } from "child_process";
 
 dotenv.config();
+
+function getCurrentBranch(): string {
+  return execSync("git rev-parse --abbrev-ref HEAD").toString().trim();
+}
 
 program
   .command("commit-pr")
@@ -24,7 +29,7 @@ program
 
       // 3. Commit and push changes
       commitChanges(commitMessage);
-      const branchName = options.branch || "auto-generated-branch";
+      const branchName = options.branch || getCurrentBranch();
       pushBranch(branchName);
 
       // 4. Create Pull Request
