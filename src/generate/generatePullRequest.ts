@@ -98,7 +98,7 @@ export async function generatePullRequestDetails(base: string) {
   for await (const chunk of response) {
     if (chunk.choices?.[0]?.delta?.content) {
       content += chunk.choices[0].delta.content;
-      spinner.text = `Generating pull request details... \n${content.trim()}`;
+      spinner.text = `Generating pull request details...${content.length} \n${content.trim()}`;
     }
   }
 
