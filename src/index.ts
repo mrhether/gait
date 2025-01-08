@@ -17,7 +17,9 @@ function getCurrentBranch(): string {
 }
 
 program
-  .command("commit-pr")
+  .name("gait")
+  .command("pr")
+  .alias("pull-request")
   .option("-b, --branch <branch>", "Branch name")
   .action(async (options) => {
     try {
