@@ -37,21 +37,26 @@ function generatePullRequestPrompt(stagedDiff: string): string {
   const pullRequestTemplate = getPullRequestTemplate();
 
   return `
-### Instruction
 Generate a high-quality pull request title and summary using the following principles:
+Title:
 1. The title should be short, actionable, and written in active voice (under 65 characters).
-2. The summary should explain what has been changed and why, focusing on the key improvements or bug fixes. IT MUST FOLLOW THE TEMPLATE in Output Format.
-3. Ensure content is easy to read with proper formatting.
+Summary:
+2. Should explain what has been changed and why, focusing on the key improvements or bug fixes (under 300 characters).
+3. *IT MUST FOLLOW THE TEMPLATE* in Output Format.
+4. Ensure content is easy to read with proper formatting.
 5. Use Markdown formatting for the Summary
+6. Don't include more than 1 lines of blank space between sections.
 
-### Output Format
-{ "title": "<pull request title>",
+## Output Format
+\`\`\`
+{ "title": "<Title>",
  "summary": <SummaryTemplate>
     ${pullRequestTemplate}
   </SummaryTemplate>
 }
+\`\`\`
 
-### Changes
+## This is the diff of the changes: 
 ${stagedDiff}
   `;
 }
@@ -98,7 +103,7 @@ export async function generatePullRequestDetails(base: string) {
   for await (const chunk of response) {
     if (chunk.choices?.[0]?.delta?.content) {
       content += chunk.choices[0].delta.content;
-      spinner.text = `Generating pull request details...${content.length} \n${content.trim()}`;
+      spinner.text = `Generating pull request details...(${content.length}) \n${content.trim()}`;
     }
   }
 
