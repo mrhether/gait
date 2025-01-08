@@ -22,17 +22,17 @@ export function getDefaultBranch(): string {
     // Check if `main` exists
     const branches = execSync("git branch -r").toString().trim();
     if (branches.includes("origin/main")) {
-      return "main";
+      return "origin/main";
     }
     // Fallback to `master` if `main` is not found
     if (branches.includes("origin/master")) {
-      return "master";
+      return "origin/master";
     }
     // Default to `main` if neither is detected (safe assumption for new repositories)
-    return "main";
+    return "origin/main";
   } catch (error) {
     console.error("Error determining default branch:", error);
-    return "main"; // Fallback to `main` in case of an error
+    return "origin/main"; // Fallback to `main` in case of an error
   }
 }
 // Utility to list unstaged/untracked files

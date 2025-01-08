@@ -12,18 +12,23 @@ export async function createPR({
   title: string;
   summary: string;
 }) {
+  const baseWithoutOrigin = base.replace("origin/", "");
+  const branchWithoutOrigin = branch.replace("origin/", "");
+
   let gitAction: "create" | "edit" = "create";
   try {
     // Check if a PR already exists for the branch
     const existingPR = execSync(
-      `gh pr list --head ${branch} --json number --jq '.[0].number'`,
+      `gh pr list --head ${branchWithoutOrigin} --json number --jq '.[0].number'`,
       { stdio: "pipe" }
     )
       .toString()
       .trim();
 
     if (existingPR) {
-      console.log(`A pull request already exists for branch ${branch}.`);
+      console.log(
+        `A pull request already exists for branch ${branchWithoutOrigin}.`
+      );
       const { action } = await inquirer.prompt([
         {
           type: "list",
@@ -39,7 +44,7 @@ export async function createPR({
 
       if (action === "newBranch") {
         // Generate a new branch name and switch to it
-        const newBranch = `${branch}-update-${Date.now()}`;
+        const newBranch = `${branchWithoutOrigin}-update-${Date.now()}`;
         execSync(`git checkout -b ${newBranch}`, { stdio: "inherit" });
         console.log(`Switched to new branch: ${newBranch}`);
         branch = newBranch; // Update the branch name to the new branch
@@ -50,21 +55,23 @@ export async function createPR({
     }
 
     // Create or update the pull request
+    const safeSummary = summary.replace(/"/g, '\\"'); // Escape double quotes
     if (gitAction === "create") {
       execSync(
-        `gh pr create --title "${title}" --body "${summary}" --base ${base} --head ${branch}`,
+        `gh pr create --title "${title}" --body "${safeSummary}" --base ${baseWithoutOrigin} --head ${branch}`,
         { stdio: "inherit" }
       );
     } else {
       execSync(
-        `gh pr edit --title "${title}" --body "${summary}" --base ${base}`,
+        `gh pr edit --title "${title}" --body "${safeSummary}" --base ${baseWithoutOrigin}`,
         { stdio: "inherit" }
       );
     }
     execSync(`gh pr view --web`, { stdio: "inherit" });
 
-    return gitAction === "create" ? "created" : "updated";
+    return Promise.resolve(gitAction === "create" ? "created" : "updated");
   } catch (error) {
-    console.error("Error while creating/updating the pull request:", error);
+    console.error("Failed to create or update pull request:", error);
+    return Promise.reject("failed");
   }
 }

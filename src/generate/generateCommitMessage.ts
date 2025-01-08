@@ -1,5 +1,5 @@
 import { execSync } from "child_process";
-import { OpenAI } from "openai";
+import { getClient } from "./aiClient";
 
 export const COMMIT_MESSAGE_OUTPUT_FORMAT = `
 <emoji> <concise description of change>
@@ -35,9 +35,7 @@ ${stagedDiff}
 }
 
 export async function generateCommitMessage(): Promise<string> {
-  const client = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+  const client = getClient();
 
   const stagedDiff = execSync(
     `git diff --staged -- . ':!package-lock.json'`
