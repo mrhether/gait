@@ -51,14 +51,15 @@ export async function createPR({
 
     // Create or update the pull request
     const safeSummary = summary.replace(/"/g, '\\"'); // Escape double quotes
+    const baseWithoutOrigin = base.replace("origin/", "");
     if (gitAction === "create") {
       execSync(
-        `gh pr create --title "${title}" --body "${safeSummary}" --base ${base} --head ${branch}`,
+        `gh pr create --title "${title}" --body "${safeSummary}" --base ${baseWithoutOrigin} --head ${branch}`,
         { stdio: "inherit" }
       );
     } else {
       execSync(
-        `gh pr edit --title "${title}" --body "${safeSummary}" --base ${base}`,
+        `gh pr edit --title "${title}" --body "${safeSummary}" --base ${baseWithoutOrigin}`,
         { stdio: "inherit" }
       );
     }
