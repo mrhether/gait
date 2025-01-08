@@ -3,17 +3,67 @@ import { OpenAI } from "openai";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { z } from "zod";
 
-// PR Summary Template
-const prSummaryTemplate = `
-### Summary
-{summary}
-
-### Caveats
-{caveats}
-
-### How is this tested?
-{testing}
+export const PULL_REQUEST_OUTPUT_FORMAT = `
+**Summary:**
+- <bullet point summary of major changes>
+- <optional bullet point for additional context if necessary>
+**Caveats:**
+<list of any caveats or limitations>
+**Testing:**
+- <describe how the changes can be tested or verified for correctness, if needed>
 `;
+
+export const COMMIT_MESSAGE_OUTPUT_FORMAT = `
+<emoji> <concise description of change>
+`;
+
+// Add a helper function to generate the commit message prompt
+function generateCommitMessagePrompt(stagedDiff: string): string {
+  return `
+### Instruction
+Generate a short, high-quality git commit message from the following changes. The message should:
+1. Be concise (ideally one sentence, under 50 characters).
+2. Use active voice and describe the primary change.
+3. Avoid unnecessary words or redundancy.
+4. Use an appropriate emoji to represent the commit type.
+
+### Output Format
+${COMMIT_MESSAGE_OUTPUT_FORMAT}
+
+### Types and Emojis
+- 🔧 fix: bug fixes
+- ✨ feat: new features
+- 🔄 refactor: code improvements
+- 📚 docs: documentation updates
+- 🧪 test: test-related changes
+- 📦 chore: other minor changes
+
+### Example
+🔧 resolve issue with authentication middleware
+
+### Changes
+${stagedDiff}
+  `;
+}
+
+// Add a helper function to generate the pull request prompt
+function generatePullRequestPrompt(stagedDiff: string): string {
+  return `
+### Instruction
+Generate a high-quality pull request title and summary using the following principles:
+1. The title should be short, actionable, and written in active voice (under 65 characters).
+2. The summary should explain what has been changed and why, focusing on the key improvements or bug fixes.
+3. Ensure content is easy to read with proper formatting.
+4. If there are limitations or follow-up actions required, include them under "Caveats".
+5. Use Markdown formatting where appropriate.
+
+### Output Format
+${PULL_REQUEST_OUTPUT_FORMAT}
+
+### Changes
+${stagedDiff}
+  `;
+}
 
 export async function generateCommitMessage(): Promise<string> {
   const client = new OpenAI({
@@ -26,7 +76,7 @@ export async function generateCommitMessage(): Promise<string> {
     throw new Error("No staged changes to generate a commit message.");
   }
 
-  const prompt = `Summarize the following changes in a concise Git commit message:\n\n${stagedDiff}`;
+  const prompt = generateCommitMessagePrompt(stagedDiff);
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [{ role: "system", content: prompt }],
@@ -52,16 +102,11 @@ export async function generatePullRequestDetails(baseBranch: string = "main") {
     throw new Error("No changes to generate pull request details.");
   }
 
-  const prompt = `Generate a concise pull request title and summary in based on the following changes in the following format.
-  Format:\n\n${prSummaryTemplate}
-  \n\n\n\n
-  Changes:\n\n${stagedDiff}
-    `;
+  const prompt = generatePullRequestPrompt(stagedDiff);
 
   const response = await client.beta.chat.completions.parse({
     model: "gpt-4o-mini",
     messages: [{ role: "system", content: prompt }],
-    max_tokens: 1000,
     response_format: zodResponseFormat(Result, "pull_request_details"),
   });
 
