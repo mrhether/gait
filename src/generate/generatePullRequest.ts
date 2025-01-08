@@ -91,12 +91,14 @@ export async function generatePullRequestDetails(base: string) {
   });
 
   let content = "";
+  process.stdout.write(chalk.green("Generating pull request details...\n"));
   for await (const chunk of response) {
     if (chunk.choices?.[0]?.delta?.content) {
       process.stdout.write(chalk.green(chunk.choices[0].delta.content));
       content += chunk.choices[0].delta.content;
     }
   }
+  process.stdout.write(chalk.green("\nGeneration complete.\n"));
 
   const parsedContent = Result.safeParse(JSON.parse(content));
   if (!parsedContent.success) {
