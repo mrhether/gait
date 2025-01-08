@@ -106,12 +106,12 @@ async function handlePushAndPR(options: any) {
 
     // Generate and create pull request
     spinner.start("Generating Pull Request Details...");
-    const prInfo = await generatePullRequestDetails();
+    const prInfo = await generatePullRequestDetails(defaultBranch);
     spinner.succeed(
       chalk.green(`Pull Request Details Generated: ${prInfo.title}`)
     );
 
-    spinner.start(`Creating Pull Request: ${chalk.blue(prInfo.title)}...`);
+    spinner.start(`Creating Pull Request:...`);
     await createPR({
       branch: branchName,
       base: defaultBranch,

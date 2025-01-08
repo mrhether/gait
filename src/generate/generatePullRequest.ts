@@ -59,12 +59,17 @@ const Result = z.object({
   summary: z.string(),
 });
 
-export async function generatePullRequestDetails(baseBranch: string = "main") {
+export async function generatePullRequestDetails(baseBranch: string) {
   const client = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  const stagedDiff = execSync(`git diff origin/${baseBranch}...HEAD`)
+  const baseBranchWithOrigin = baseBranch.includes("origin")
+    ? baseBranch
+    : `origin/${baseBranch}`;
+  const stagedDiff = execSync(
+    `git diff ${baseBranchWithOrigin}...HEAD -- . ':!package-lock.json'`
+  )
     .toString()
     .trim();
 
