@@ -74,10 +74,14 @@ Generate a high-quality pull request title and summary using the following princ
 2. The summary should explain what has been changed and why, focusing on the key improvements or bug fixes.
 3. Ensure content is easy to read with proper formatting.
 4. If there are limitations or follow-up actions required, include them under "Caveats".
-5. Use Markdown formatting where appropriate.
+5. Use Markdown formatting for the Summary 
 
 ### Output Format
-${pullRequestTemplate}
+{ "title": "<pull request title>",
+ "summary": <Summary>
+    ${pullRequestTemplate}
+  </Summary> 
+}
 
 ### Changes
 ${stagedDiff}
