@@ -6,22 +6,24 @@ A simple CLI tool to streamline Git workflows, including generating commit messa
 
 Ensure you have Node.js installed, then install the CLI globally:
 
-```bash
+_Install gh cli if you haven't already_
 
+```bash
+brew install gh
+gh auth login
+```
+
+```bash
 npm install -g gait-cli
 ```
 
-````
-
 ## Prerequisites
 
-1. **OpenAI API Key**: Export your OpenAI API key as an environment variable:
+**OpenAI API Key**: Export your OpenAI API key as an environment variable:
 
-   ```bash
-   export OPENAI_API_KEY=your-openai-api-key
-````
-
-2. **GitHub CLI**: Ensure the `gh` CLI is installed and authenticated with your GitHub account. [GitHub CLI Installation Guide](https://cli.github.com/manual/installation).
+```bash
+export OPENAI_API_KEY=your-openai-api-key
+```
 
 ## Usage
 
