@@ -17,7 +17,7 @@ export async function createPR({
     // Check if a PR already exists for the branch
     const existingPR = execSync(
       `gh pr list --head ${branch} --json number --jq '.[0].number'`,
-      { stdio: "inherit" }
+      { stdio: "pipe" }
     )
       .toString()
       .trim();
