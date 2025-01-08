@@ -10,10 +10,7 @@ function createSafeSpinner(text: string) {
 }
 
 import { program } from "commander";
-import {
-  generateCommitMessage,
-  generatePullRequestDetails,
-} from "./generateCommit";
+import { generateCommitMessage, generatePullRequestDetails } from "./generate";
 import { createPR } from "./createPR";
 import {
   hasStagedChanges,
