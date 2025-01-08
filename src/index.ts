@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-import dotenv from "dotenv";
 import chalk from "chalk";
 import ora from "ora";
 import { program } from "commander";
+import { execSync } from "child_process";
+import inquirer from "inquirer";
 import { generateCommitMessage, generatePullRequestDetails } from "./generate";
 import {
   hasStagedChanges,
@@ -10,6 +11,7 @@ import {
   pushBranch,
   getCurrentBranch,
   getDefaultBranch,
+  getUnstagedFiles,
 } from "./gitUtils";
 import { createPR } from "./ghUtils";
 
@@ -19,10 +21,11 @@ function createSafeSpinner(text: string) {
   return ora({ text, isEnabled: isInteractive });
 }
 
-dotenv.config();
-
 // Helper function to handle staging and committing changes
-async function handleCommit(warn = true): Promise<void> {
+async function handleCommit(
+  warn = true,
+  commitArgs: string[] = []
+): Promise<void> {
   if (hasStagedChanges()) {
     const spinner = createSafeSpinner(
       "Staged changes detected. Generating commit message..."
@@ -35,15 +38,47 @@ async function handleCommit(warn = true): Promise<void> {
         chalk.green(`Generated Commit Message: ${commitMessage}`)
       );
 
-      // Commit changes
+      // Commit changes with additional arguments
       spinner.start("Committing changes...");
-      commitChanges(commitMessage);
+      commitChanges(`${commitMessage} ${commitArgs.join(" ")}`);
       spinner.succeed(chalk.green("Changes committed successfully!"));
     } catch (error) {
       spinner.fail(chalk.red("Failed to commit changes."));
       console.error(chalk.red("Error:"), error);
     }
   } else {
+    const unstagedFiles = getUnstagedFiles();
+    if (unstagedFiles.length > 0) {
+      console.log(
+        chalk.yellow(
+          "No staged changes found. The following files are unstaged or untracked:"
+        )
+      );
+      console.log(chalk.blue(unstagedFiles.join("\n")));
+      const { addFiles } = await inquirer.prompt([
+        {
+          type: "confirm",
+          name: "addFiles",
+          message: chalk.green("Would you like to add these files?"),
+          default: false,
+        },
+      ]);
+
+      if (addFiles === true) {
+        try {
+          execSync("git add .", { stdio: "inherit" });
+          console.log(
+            chalk.green(
+              "Files added successfully. Please stage changes and try again."
+            )
+          );
+          return await handleCommit(warn, commitArgs); // Retry after adding files
+        } catch (error) {
+          console.error(chalk.red("Failed to add files."), error);
+        }
+      }
+    }
+
     if (warn) {
       console.log(
         chalk.yellow(
@@ -99,16 +134,20 @@ program
   .name("gait")
   .command("commit")
   .description("Stage changes, generate a commit message, and commit.")
-  .action(() => trycatch(handleCommit));
+  .allowUnknownOption() // Allow passing unknown options to the command
+  .action((args) => {
+    trycatch(() => handleCommit(true, args));
+  });
 
 program
   .command("pr")
   .alias("pull-request")
   .option("-b, --branch <branch>", "Branch name")
-  .action(async (options) => {
+  .allowUnknownOption()
+  .action(async (args) => {
     await trycatch(async () => {
-      await handleCommit(false);
-      await handlePushAndPR(options);
+      await handleCommit(false, args);
+      await handlePushAndPR(args);
     });
   });
 

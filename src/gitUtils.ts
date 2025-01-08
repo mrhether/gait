@@ -35,3 +35,12 @@ export function getDefaultBranch(): string {
     return "main"; // Fallback to `main` in case of an error
   }
 }
+// Utility to list unstaged/untracked files
+export function getUnstagedFiles(): string[] {
+  const output = execSync("git status --porcelain").toString().trim();
+  const files = output
+    .split("\n")
+    .filter((line) => line.startsWith("??") || line.startsWith(" M"))
+    .map((line) => line.slice(3).trim()); // Extract file paths after status code
+  return files;
+}
