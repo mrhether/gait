@@ -117,7 +117,9 @@ export async function generatePullRequestDetails(baseBranch: string = "main") {
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  const stagedDiff = execSync(`git diff ${baseBranch}...HEAD`).toString();
+  const stagedDiff = execSync(
+    `git diff origin/${baseBranch}...HEAD`
+  ).toString();
 
   if (!stagedDiff) {
     throw new Error("No changes to generate pull request details.");
