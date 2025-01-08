@@ -59,30 +59,34 @@ const Result = z.object({
   summary: z.string(),
 });
 
-export async function generatePullRequestDetails(baseBranch: string) {
+export async function generatePullRequestDetails(base: string) {
   const client = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  const baseBranchWithOrigin = baseBranch.includes("origin")
-    ? baseBranch
-    : `origin/${baseBranch}`;
-  const stagedDiff = execSync(
-    `git diff ${baseBranchWithOrigin}...HEAD -- . ':!package-lock.json'`
-  )
-    .toString()
-    .trim();
+  const branchWithOrigin = base.includes("origin") ? base : `origin/${base}`;
+  let diff = execSync(
+    `git diff ${branchWithOrigin}...HEAD -- . ':!package-lock.json'`
+  ).toString();
 
-  if (!stagedDiff) {
+  if (!diff) {
     throw new Error("No changes to generate pull request details.");
   }
 
-  const prompt = generatePullRequestPrompt(stagedDiff);
+  if (diff.length > 10000) {
+    console.warn(
+      "Warning: The diff is too large to process... truncating to 10,000 characters."
+    );
+    diff = diff.slice(0, 10000);
+  }
+
+  const prompt = generatePullRequestPrompt(diff);
 
   const response = await client.beta.chat.completions.parse({
     model: "gpt-4o-mini",
     messages: [{ role: "system", content: prompt }],
     response_format: zodResponseFormat(Result, "pull_request_details"),
+    max_tokens: 10000,
   });
 
   const content = response.choices?.[0]?.message?.parsed;

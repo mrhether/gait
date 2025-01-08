@@ -51,6 +51,7 @@ export async function generateCommitMessage(): Promise<string> {
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [{ role: "system", content: prompt }],
+    max_tokens: 10000,
   });
 
   return response.choices?.[0]?.message?.content ?? "Changes";
