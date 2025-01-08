@@ -50,7 +50,7 @@ export async function createPR({
     }
 
     // Create or update the pull request
-    const safeSummary = summary.replace(/"/g, '\\"');
+    const safeSummary = summary.replace(/"/g, '\\"'); // Escape double quotes
     if (gitAction === "create") {
       execSync(
         `gh pr create --title "${title}" --body "${safeSummary}" --base ${base} --head ${branch}`,
@@ -64,8 +64,9 @@ export async function createPR({
     }
     execSync(`gh pr view --web`, { stdio: "inherit" });
 
-    return gitAction === "create" ? "created" : "updated";
+    return Promise.resolve(gitAction === "create" ? "created" : "updated");
   } catch (error) {
-    console.error("Error while creating/updating the pull request:", error);
+    console.error("Failed to create or update pull request:", error);
+    return Promise.reject("failed");
   }
 }
