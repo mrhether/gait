@@ -74,7 +74,7 @@ async function handlePushAndPR(options: any) {
     spinner.start(`Creating Pull Request: ${chalk.blue(prInfo.title)}...`);
     await createPR({
       branch: branchName,
-      base: defaultBranch, // Use the detected default branch
+      base: defaultBranch,
       title: prInfo.title,
       summary: prInfo.summary,
     });
