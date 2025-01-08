@@ -2,7 +2,10 @@
 import dotenv from "dotenv";
 
 import { program } from "commander";
-import { generateCommitMessage } from "./generateCommit";
+import {
+  generateCommitMessage,
+  generatePullRequestDetails,
+} from "./generateCommit";
 import { createPR } from "./createPR";
 import { hasStagedChanges, commitChanges, pushBranch } from "./gitUtils";
 import { execSync } from "child_process";
@@ -33,8 +36,16 @@ program
       const branchName = options.branch || getCurrentBranch();
       pushBranch(branchName);
 
-      // 4. Create Pull Request
-      await createPR(branchName, commitMessage);
+      // 4. Generate Git diff for PR
+      const prInfo = await generatePullRequestDetails();
+
+      // 5. Create Pull Request
+      await createPR({
+        branch: branchName,
+        title: prInfo.title,
+        summary: prInfo.summary,
+      });
+
       console.log("Pull request created successfully!");
     } catch (err) {
       console.error("Error:", err);
