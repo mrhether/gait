@@ -79,6 +79,7 @@ export async function generatePullRequestDetails(base: string) {
     );
     diff = diff.slice(0, 10000);
   }
+  console.log("Diff:", diff.length);
 
   const prompt = generatePullRequestPrompt(diff);
 
