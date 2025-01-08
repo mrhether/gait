@@ -104,5 +104,6 @@ export async function generatePullRequestDetails(base: string) {
   if (!parsedContent.success) {
     throw new Error("Could not generate structured pull request details.");
   }
+
   return parsedContent.data;
 }
