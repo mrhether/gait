@@ -71,7 +71,7 @@ function generatePullRequestPrompt(stagedDiff: string): string {
 ### Instruction
 Generate a high-quality pull request title and summary using the following principles:
 1. The title should be short, actionable, and written in active voice (under 65 characters).
-2. The summary should explain what has been changed and why, focusing on the key improvements or bug fixes. IT MUST FOLLOW THE TEMPLATE BELOW.
+2. The summary should explain what has been changed and why, focusing on the key improvements or bug fixes. IT MUST FOLLOW THE TEMPLATE in Output Format. 
 3. Ensure content is easy to read with proper formatting.
 5. Use Markdown formatting for the Summary 
 
@@ -117,9 +117,9 @@ export async function generatePullRequestDetails(baseBranch: string = "main") {
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  const stagedDiff = execSync(
-    `git diff origin/${baseBranch}...HEAD`
-  ).toString();
+  const stagedDiff = execSync(`git diff origin/${baseBranch}...HEAD`)
+    .toString()
+    .trim();
 
   if (!stagedDiff) {
     throw new Error("No changes to generate pull request details.");
