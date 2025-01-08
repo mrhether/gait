@@ -50,15 +50,15 @@ export async function createPR({
     }
 
     // Create or update the pull request
-    const summaryEncoded = encodeURIComponent(summary);
+    const safeSummary = summary.replace(/"/g, '\\"');
     if (gitAction === "create") {
       execSync(
-        `gh pr create --title "${title}" --body "${summaryEncoded}" --base ${base} --head ${branch}`,
+        `gh pr create --title "${title}" --body "${safeSummary}" --base ${base} --head ${branch}`,
         { stdio: "inherit" }
       );
     } else {
       execSync(
-        `gh pr edit --title "${title}" --body "${summaryEncoded}" --base ${base}`,
+        `gh pr edit --title "${title}" --body "${safeSummary}" --base ${base}`,
         { stdio: "inherit" }
       );
     }
