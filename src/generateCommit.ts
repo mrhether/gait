@@ -2,6 +2,8 @@ import { execSync } from "child_process";
 import { OpenAI } from "openai";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { z } from "zod";
+import { existsSync, readFileSync } from "fs";
+import { resolve } from "path";
 
 export const PULL_REQUEST_OUTPUT_FORMAT = `
 **Summary:**
@@ -46,8 +48,26 @@ ${stagedDiff}
   `;
 }
 
+const DEFAULT_PULL_REQUEST_TEMPLATE_PATH = ".github/PULL_REQUEST_TEMPLATE.md";
+
+function getPullRequestTemplate(): string {
+  const templatePath = resolve(
+    process.cwd(),
+    DEFAULT_PULL_REQUEST_TEMPLATE_PATH
+  );
+
+  if (existsSync(templatePath)) {
+    console.log(`Using custom pull request template from ${templatePath}`);
+    return readFileSync(templatePath, "utf-8");
+  }
+
+  return PULL_REQUEST_OUTPUT_FORMAT;
+}
+
 // Add a helper function to generate the pull request prompt
 function generatePullRequestPrompt(stagedDiff: string): string {
+  const pullRequestTemplate = getPullRequestTemplate();
+
   return `
 ### Instruction
 Generate a high-quality pull request title and summary using the following principles:
@@ -58,7 +78,7 @@ Generate a high-quality pull request title and summary using the following princ
 5. Use Markdown formatting where appropriate.
 
 ### Output Format
-${PULL_REQUEST_OUTPUT_FORMAT}
+${pullRequestTemplate}
 
 ### Changes
 ${stagedDiff}
@@ -80,7 +100,6 @@ export async function generateCommitMessage(): Promise<string> {
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [{ role: "system", content: prompt }],
-    max_tokens: 50,
   });
 
   return response.choices?.[0]?.message?.content ?? "Changes";

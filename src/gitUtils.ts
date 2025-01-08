@@ -12,3 +12,7 @@ export function commitChanges(message: string): void {
 export function pushBranch(branch: string): void {
   execSync(`git push -u origin ${branch}`, { stdio: "inherit" });
 }
+
+export function getCurrentBranch(): string {
+  return execSync("git rev-parse --abbrev-ref HEAD").toString().trim();
+}
