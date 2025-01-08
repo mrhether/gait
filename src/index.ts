@@ -2,6 +2,7 @@
 import dotenv from "dotenv";
 import chalk from "chalk";
 import ora from "ora";
+
 // Helper function to safely initialize ora spinner
 function createSafeSpinner(text: string) {
   const isInteractive = process.stdout && process.stdout.isTTY;
@@ -26,12 +27,16 @@ dotenv.config();
 // Helper function to handle staging and committing changes
 async function handleCommit(): Promise<void> {
   if (hasStagedChanges()) {
-    const spinner = createSafeSpinner("Staged changes detected. Generating commit message...").start();
+    const spinner = createSafeSpinner(
+      "Staged changes detected. Generating commit message..."
+    ).start();
 
     try {
       // Generate commit message
       const commitMessage = await generateCommitMessage();
-      spinner.succeed(chalk.green(`Generated Commit Message: ${commitMessage}`));
+      spinner.succeed(
+        chalk.green(`Generated Commit Message: ${commitMessage}`)
+      );
 
       // Commit changes
       spinner.start("Committing changes...");
@@ -42,13 +47,19 @@ async function handleCommit(): Promise<void> {
       console.error(chalk.red("Error:"), error);
     }
   } else {
-    console.log(chalk.yellow("No staged changes found. Please stage changes and try again."));
+    console.log(
+      chalk.yellow(
+        "No staged changes found. Please stage changes and try again."
+      )
+    );
   }
 }
 
 async function handlePushAndPR(options: any) {
   const branchName = options.branch || getCurrentBranch();
-  const spinner = createSafeSpinner(`Pushing branch ${chalk.blue(branchName)}...`).start();
+  const spinner = createSafeSpinner(
+    `Pushing branch ${chalk.blue(branchName)}...`
+  ).start();
 
   try {
     pushBranch(branchName);
@@ -57,7 +68,9 @@ async function handlePushAndPR(options: any) {
     // Generate and create pull request
     spinner.start("Generating Pull Request Details...");
     const prInfo = await generatePullRequestDetails();
-    spinner.succeed(chalk.green(`Pull Request Details Generated: ${prInfo.title}`));
+    spinner.succeed(
+      chalk.green(`Pull Request Details Generated: ${prInfo.title}`)
+    );
 
     spinner.start(`Creating Pull Request: ${chalk.blue(prInfo.title)}...`);
     await createPR({
