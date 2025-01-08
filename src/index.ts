@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import dotenv from "dotenv";
 import chalk from "chalk";
 import ora from "ora";
 import { program } from "commander";
@@ -21,6 +22,8 @@ function createSafeSpinner(text: string) {
   return ora({ text, isEnabled: isInteractive });
 }
 
+dotenv.config();
+
 // Helper function to handle staging and committing changes
 async function handleCommit(
   warn = true,
@@ -39,7 +42,7 @@ async function handleCommit(
       );
 
       // Commit changes with additional arguments
-      spinner.start("Committing changes...");
+      spinner.start(`Committing: git commit ${commitArgs.join(" ")}...`);
       commitChanges(`${commitMessage} ${commitArgs.join(" ")}`);
       spinner.succeed(chalk.green("Changes committed successfully!"));
     } catch (error) {
@@ -48,6 +51,7 @@ async function handleCommit(
     }
   } else {
     const unstagedFiles = getUnstagedFiles();
+    console.log(unstagedFiles);
     if (unstagedFiles.length > 0) {
       console.log(
         chalk.yellow(
@@ -66,7 +70,7 @@ async function handleCommit(
 
       if (addFiles === true) {
         try {
-          execSync("git add .", { stdio: "inherit" });
+          execSync("git add -A", { stdio: "inherit" });
           console.log(
             chalk.green(
               "Files added successfully. Please stage changes and try again."
@@ -134,20 +138,21 @@ program
   .name("gait")
   .command("commit")
   .description("Stage changes, generate a commit message, and commit.")
-  .allowUnknownOption() // Allow passing unknown options to the command
-  .action((args) => {
-    trycatch(() => handleCommit(true, args));
+  .allowExcessArguments() // Allow passing unknown options to the command
+  .allowUnknownOption()
+  .action((_, b) => {
+    trycatch(() => handleCommit(true, b.args));
   });
 
 program
   .command("pr")
   .alias("pull-request")
   .option("-b, --branch <branch>", "Branch name")
-  .allowUnknownOption()
-  .action(async (args) => {
+  .allowExcessArguments()
+  .action(async (_, b) => {
     await trycatch(async () => {
-      await handleCommit(false, args);
-      await handlePushAndPR(args);
+      await handleCommit(false, b.args);
+      await handlePushAndPR(b.args);
     });
   });
 
