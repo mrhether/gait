@@ -2,25 +2,22 @@
 import dotenv from "dotenv";
 import chalk from "chalk";
 import ora from "ora";
+import { program } from "commander";
+import { generateCommitMessage, generatePullRequestDetails } from "./generate";
+import {
+  hasStagedChanges,
+  commitChanges,
+  pushBranch,
+  getCurrentBranch,
+  getDefaultBranch,
+} from "./gitUtils";
+import { createPR } from "./ghUtils";
 
 // Helper function to safely initialize ora spinner
 function createSafeSpinner(text: string) {
   const isInteractive = process.stdout && process.stdout.isTTY;
   return ora({ text, isEnabled: isInteractive });
 }
-
-import { program } from "commander";
-import {
-  generateCommitMessage,
-  generatePullRequestDetails,
-} from "./generateCommit";
-import { createPR } from "./createPR";
-import {
-  hasStagedChanges,
-  commitChanges,
-  pushBranch,
-  getCurrentBranch,
-} from "./gitUtils";
 
 dotenv.config();
 
@@ -56,6 +53,8 @@ async function handleCommit(): Promise<void> {
 }
 
 async function handlePushAndPR(options: any) {
+  // Determine the default branch dynamically
+  const defaultBranch = getDefaultBranch();
   const branchName = options.branch || getCurrentBranch();
   const spinner = createSafeSpinner(
     `Pushing branch ${chalk.blue(branchName)}...`
@@ -75,6 +74,7 @@ async function handlePushAndPR(options: any) {
     spinner.start(`Creating Pull Request: ${chalk.blue(prInfo.title)}...`);
     await createPR({
       branch: branchName,
+      base: defaultBranch,
       title: prInfo.title,
       summary: prInfo.summary,
     });

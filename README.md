@@ -1,10 +1,8 @@
-# Gait CLI
+# gAIt CLI
 
-A simple CLI tool to streamline Git workflows, including generating commit messages and creating pull requests with the help of OpenAI's API.
+A CLI tool to automate Git workflows using AI-generated commit/pr messages.
 
 ## Installation
-
-Ensure you have Node.js installed, then install the CLI globally:
 
 ```bash
 npm install -g gait-cli
@@ -13,6 +11,7 @@ npm install -g gait-cli
 ## Prerequisites
 
 1. **OpenAI API Key**: Export your OpenAI API key as an environment variable:
+
    ```bash
    export OPENAI_API_KEY=your-openai-api-key
    ```
@@ -26,6 +25,7 @@ npm install -g gait-cli
 The `gait commit` command automates the process of generating a commit message and committing staged changes.
 
 #### Workflow:
+
 1. Stage your changes manually using `git add`.
 2. The command generates a commit message based on the staged changes.
 3. Creates a Git commit with the generated message.
@@ -47,6 +47,7 @@ gait commit
 ```
 
 Expected output:
+
 ```
 Changes staged for commit, committing...
 Generated Commit Message: Add new feature to improve user experience
@@ -61,6 +62,7 @@ Changes committed successfully!
 The `gait pr` command automates the process of pushing a branch and creating a pull request on GitHub.
 
 #### Workflow:
+
 1. Stage your changes manually using `git add`.
 2. The command generates a commit message based on the staged changes.
 3. Creates a Git commit, pushes the branch, and opens a pull request in your browser.
@@ -72,6 +74,7 @@ gait pr --branch <branch-name>
 ```
 
 #### Options:
+
 - `-b, --branch <branch>`: Specify the branch name. Defaults to the current branch if not provided.
 
 ### Example
@@ -85,6 +88,7 @@ gait pr --branch feature/add-new-feature
 ```
 
 Expected output:
+
 ```
 Changes staged for commit, committing...
 Generated Commit Message: Add new feature to improve user experience
