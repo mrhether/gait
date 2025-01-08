@@ -22,7 +22,7 @@ function createSafeSpinner(text: string) {
 dotenv.config();
 
 // Helper function to handle staging and committing changes
-async function handleCommit(): Promise<void> {
+async function handleCommit(warn = true): Promise<void> {
   if (hasStagedChanges()) {
     const spinner = createSafeSpinner(
       "Staged changes detected. Generating commit message..."
@@ -44,11 +44,13 @@ async function handleCommit(): Promise<void> {
       console.error(chalk.red("Error:"), error);
     }
   } else {
-    console.log(
-      chalk.yellow(
-        "No staged changes found. Please stage changes and try again."
-      )
-    );
+    if (warn) {
+      console.log(
+        chalk.yellow(
+          "No staged changes found. Please stage changes and try again."
+        )
+      );
+    }
   }
 }
 
@@ -85,31 +87,29 @@ async function handlePushAndPR(options: any) {
   }
 }
 
+const trycatch = async (fn: Function) => {
+  try {
+    await fn();
+  } catch (error) {
+    console.error(chalk.red("Error:"), error);
+  }
+};
+
 program
   .name("gait")
   .command("commit")
   .description("Stage changes, generate a commit message, and commit.")
-  .action(async () => {
-    try {
-      await handleCommit();
-    } catch (err) {
-      console.error(chalk.red("Error:"), err);
-    }
-  });
+  .action(() => trycatch(handleCommit));
 
 program
   .command("pr")
   .alias("pull-request")
   .option("-b, --branch <branch>", "Branch name")
   .action(async (options) => {
-    try {
-      // Commit changes if there are staged changes
-      await handleCommit();
-      // Push the branch
+    await trycatch(async () => {
+      await handleCommit(false);
       await handlePushAndPR(options);
-    } catch (err) {
-      console.error(chalk.red("Error:"), err);
-    }
+    });
   });
 
 program.parse(process.argv);
