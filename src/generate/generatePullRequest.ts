@@ -4,6 +4,7 @@ import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { z } from "zod";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
+import chalk from "chalk"; // Import chalk
 
 const DEFAULT_PULL_REQUEST_TEMPLATE_PATH = ".github/PULL_REQUEST_TEMPLATE.md";
 
@@ -79,20 +80,27 @@ export async function generatePullRequestDetails(base: string) {
     );
     diff = diff.slice(0, 10000);
   }
-  console.log("Diff:", diff.length);
 
   const prompt = generatePullRequestPrompt(diff);
-
-  const response = await client.beta.chat.completions.parse({
+  const response = await client.beta.chat.completions.stream({
     model: "gpt-4o-mini",
     messages: [{ role: "system", content: prompt }],
-    response_format: zodResponseFormat(Result, "pull_request_details"),
+    response_format: zodResponseFormat(Result, "output"),
+    stream: true, // Enable streaming
     max_tokens: 10000,
   });
 
-  const content = response.choices?.[0]?.message?.parsed;
-  if (!content) {
+  let content = "";
+  for await (const chunk of response) {
+    if (chunk.choices?.[0]?.delta?.content) {
+      process.stdout.write(chalk.green(chunk.choices[0].delta.content));
+      content += chunk.choices[0].delta.content;
+    }
+  }
+
+  const parsedContent = Result.safeParse(JSON.parse(content));
+  if (!parsedContent.success) {
     throw new Error("Could not generate structured pull request details.");
   }
-  return content;
+  return parsedContent.data;
 }
