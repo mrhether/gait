@@ -21,6 +21,41 @@ npm install -g gait-cli
 
 ## Usage
 
+### Command: `gait commit`
+
+The `gait commit` command automates the process of generating a commit message and committing staged changes.
+
+#### Workflow:
+1. Stage your changes manually using `git add`.
+2. The command generates a commit message based on the staged changes.
+3. Creates a Git commit with the generated message.
+
+#### Syntax:
+
+```bash
+gait commit
+```
+
+#### Example
+
+```bash
+# Stage your changes
+git add .
+
+# Run the command
+gait commit
+```
+
+Expected output:
+```
+Changes staged for commit, committing...
+Generated Commit Message: Add new feature to improve user experience
+[master 123abc4] Add new feature to improve user experience
+Changes committed successfully!
+```
+
+---
+
 ### Command: `gait pr` (Alias: `gait pull-request`)
 
 The `gait pr` command automates the process of pushing a branch and creating a pull request on GitHub.
