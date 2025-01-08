@@ -1,10 +1,8 @@
-# Gait CLI
+# gAIt CLI
 
-A simple CLI tool to streamline Git workflows, including generating commit messages and creating pull requests with the help of OpenAI's API.
+A CLI tool to automate Git workflows using AI-generated commit/pr messages.
 
 ## Installation
-
-Ensure you have Node.js installed, then install the CLI globally:
 
 ```bash
 npm install -g gait-cli
