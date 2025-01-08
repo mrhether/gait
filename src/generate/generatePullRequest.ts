@@ -1,5 +1,5 @@
 import { execSync } from "child_process";
-import { zodResponseFormat } from "openai/helpers/zod.mjs";
+// import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { z } from "zod";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
@@ -69,6 +69,15 @@ Summary:
 
 ## Diff of changes:
 ${diff}
+
+
+As a reminder, you must return JSON data with the following format:
+\`\`\`
+{
+  "title": "Title",
+  "summary": "Summary"
+}
+\`\`\
 `;
 }
 
@@ -105,11 +114,13 @@ export async function generatePullRequestDetails(
   const prompt = generatePullRequestPrompt(truncatedDiff);
 
   const response = await client.beta.chat.completions.stream({
-    model: "gpt-4o-2024-08-01-preview",
+    model: "gpt-4o-mini",
     messages: [{ role: "system", content: prompt }],
-    response_format: zodResponseFormat(Result, "output"),
     stream: true,
     max_tokens: MAX_TOKENS,
+    response_format: { type: "json_object" },
+    // Uncomment when github actions are fixed to support
+    // response_format: zodResponseFormat(Result, "output"),
   });
 
   let content = "";
