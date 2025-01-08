@@ -6,24 +6,18 @@ A simple CLI tool to streamline Git workflows, including generating commit messa
 
 Ensure you have Node.js installed, then install the CLI globally:
 
-_Install gh cli if you haven't already_
-
-```bash
-brew install gh
-gh auth login
-```
-
 ```bash
 npm install -g gait-cli
 ```
 
 ## Prerequisites
 
-**OpenAI API Key**: Export your OpenAI API key as an environment variable:
+1. **OpenAI API Key**: Export your OpenAI API key as an environment variable:
+   ```bash
+   export OPENAI_API_KEY=your-openai-api-key
+   ```
 
-```bash
-export OPENAI_API_KEY=your-openai-api-key
-```
+2. **GitHub CLI**: Ensure the `gh` CLI is installed and authenticated with your GitHub account. [GitHub CLI Installation Guide](https://cli.github.com/manual/installation).
 
 ## Usage
 
@@ -32,13 +26,39 @@ export OPENAI_API_KEY=your-openai-api-key
 The `gait pr` command automates the process of pushing a branch and creating a pull request on GitHub.
 
 #### Workflow:
+1. Stage your changes manually using `git add`.
+2. The command generates a commit message based on the staged changes.
+3. Creates a Git commit, pushes the branch, and opens a pull request in your browser.
 
-1. Stage your changes using `git add` or `git add -A`.
-2. `gait pr` will commit your changes with a generated commit message and open a pr on github.
+#### Syntax:
+
+```bash
+gait pr --branch <branch-name>
+```
 
 #### Options:
-
 - `-b, --branch <branch>`: Specify the branch name. Defaults to the current branch if not provided.
+
+### Example
+
+```bash
+# Stage your changes
+git add .
+
+# Run the command
+gait pr --branch feature/add-new-feature
+```
+
+Expected output:
+```
+Changes staged for commit, committing...
+Generated Commit Message: Add new feature to improve user experience
+[feature/add-new-feature 123abc4] Add new feature to improve user experience
+Branch 'feature/add-new-feature' set up to track remote branch 'feature/add-new-feature' from 'origin'.
+Pull request created successfully!
+```
+
+This will create a pull request on GitHub and open it in your browser.
 
 ## License
 
