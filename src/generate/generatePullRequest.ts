@@ -89,6 +89,5 @@ export async function generatePullRequestDetails(baseBranch: string) {
   if (!content) {
     throw new Error("Could not generate structured pull request details.");
   }
-
   return content;
 }
