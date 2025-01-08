@@ -105,7 +105,7 @@ export async function generatePullRequestDetails(
   const prompt = generatePullRequestPrompt(truncatedDiff);
 
   const response = await client.beta.chat.completions.stream({
-    model: "gpt-4o",
+    model: "gpt-4o-2024-08-06",
     messages: [{ role: "system", content: prompt }],
     response_format: zodResponseFormat(Result, "output"),
     stream: true,
@@ -123,8 +123,6 @@ export async function generatePullRequestDetails(
       spinner.text = `Generating pull request details... (${content.length} characters)\n ${chalk.gray(content.trim())}`;
     }
   }
-
-  spinner.stop();
 
   try {
     const parsedContent = Result.safeParse(JSON.parse(content));
