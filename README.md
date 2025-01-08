@@ -1,6 +1,6 @@
 # gAIt CLI
 
-A CLI tool to automate Git workflows using AI-generated commit/pr messages.
+A CLI tool to automate Git workflows using AI-generated commit and PR messages.
 
 ## Installation
 
@@ -20,84 +20,21 @@ npm install -g gait-cli
 
 ## Usage
 
-### Command: `gait commit`
+### Create Commits
 
-The `gait commit` command automates the process of generating a commit message and committing staged changes.
-
-#### Workflow:
-
-1. Stage your changes manually using `git add`.
-2. The command generates a commit message based on the staged changes.
-3. Creates a Git commit with the generated message.
-
-#### Syntax:
+Generate and commit messages for staged changes.
 
 ```bash
-gait commit
+gait c
 ```
 
-#### Example
+### Create Pull Requests
+
+Push a branch and create a pull request on GitHub.
 
 ```bash
-# Stage your changes
-git add .
-
-# Run the command
-gait commit
+gait pr
 ```
-
-Expected output:
-
-```
-Changes staged for commit, committing...
-Generated Commit Message: Add new feature to improve user experience
-[master 123abc4] Add new feature to improve user experience
-Changes committed successfully!
-```
-
----
-
-### Command: `gait pr` (Alias: `gait pull-request`)
-
-The `gait pr` command automates the process of pushing a branch and creating a pull request on GitHub.
-
-#### Workflow:
-
-1. Stage your changes manually using `git add`.
-2. The command generates a commit message based on the staged changes.
-3. Creates a Git commit, pushes the branch, and opens a pull request in your browser.
-
-#### Syntax:
-
-```bash
-gait pr --branch <branch-name>
-```
-
-#### Options:
-
-- `-b, --branch <branch>`: Specify the branch name. Defaults to the current branch if not provided.
-
-### Example
-
-```bash
-# Stage your changes
-git add .
-
-# Run the command
-gait pr --branch feature/add-new-feature
-```
-
-Expected output:
-
-```
-Changes staged for commit, committing...
-Generated Commit Message: Add new feature to improve user experience
-[feature/add-new-feature 123abc4] Add new feature to improve user experience
-Branch 'feature/add-new-feature' set up to track remote branch 'feature/add-new-feature' from 'origin'.
-Pull request created successfully!
-```
-
-This will create a pull request on GitHub and open it in your browser.
 
 ## License
 
