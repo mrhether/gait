@@ -142,6 +142,7 @@ export async function generatePullRequestDetails(
     );
     return parsedContent.data;
   } catch (error: any) {
+    spinner.fail(chalk.red("Failed to parse pull request details."));
     throw new Error("Failed to parse pull request details: " + error.message);
   }
 }
