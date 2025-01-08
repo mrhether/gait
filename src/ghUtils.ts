@@ -11,7 +11,7 @@ export async function createPR({
   base: string;
   title: string;
   summary: string;
-}): Promise<void> {
+}) {
   let gitAction: "create" | "edit" = "create";
   try {
     // Check if a PR already exists for the branch
@@ -49,12 +49,20 @@ export async function createPR({
     }
 
     // Create or update the pull request
-
-    execSync(
-      `gh pr ${gitAction} --title "${title}" --body "${summary}" --base ${base} --head ${branch}`,
-      { stdio: "inherit" }
-    );
+    if (gitAction === "create") {
+      execSync(
+        `gh pr create --title "${title}" --body "${summary}" --base ${base} --head ${branch}`,
+        { stdio: "inherit" }
+      );
+    } else {
+      execSync(
+        `gh pr edit --title "${title}" --body "${summary}" --base ${base}`,
+        { stdio: "inherit" }
+      );
+    }
     execSync(`gh pr view --web`, { stdio: "inherit" });
+
+    return gitAction === "create" ? "created" : "updated";
   } catch (error) {
     console.error("Error while creating/updating the pull request:", error);
   }

@@ -99,14 +99,14 @@ async function handlePushAndPR(options: any) {
     // Generate and create pull request
     const prInfo = await generatePullRequestDetails(defaultBranch);
 
-    spinner.start(`Creating Pull Request:...`);
-    await createPR({
+    spinner.start(`Creating/Updating Pull Request:...`);
+    const action = await createPR({
       branch: branchName,
       base: defaultBranch,
       title: prInfo.title,
       summary: prInfo.summary,
     });
-    spinner.succeed(chalk.green("Pull request created successfully!"));
+    spinner.succeed(chalk.green(`Pull request ${action} successfully!`));
   } catch (error) {
     spinner.fail(chalk.red("Failed to push branch or create pull request."));
     console.error(chalk.red("Error:"), error);
