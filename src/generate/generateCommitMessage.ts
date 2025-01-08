@@ -37,9 +37,9 @@ ${stagedDiff}
 export async function generateCommitMessage(): Promise<string> {
   const client = getClient();
 
-  const stagedDiff = execSync(
-    `git diff --staged -- . ':!package-lock.json'`
-  ).toString();
+  const stagedDiff = execSync(`git diff --staged -- . ':!package-lock.json'`, {
+    encoding: "utf-8",
+  });
 
   if (!stagedDiff) {
     throw new Error("No staged changes to generate a commit message.");
