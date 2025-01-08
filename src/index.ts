@@ -2,22 +2,21 @@
 import dotenv from "dotenv";
 import chalk from "chalk";
 import ora from "ora";
-
-// Helper function to safely initialize ora spinner
-function createSafeSpinner(text: string) {
-  const isInteractive = process.stdout && process.stdout.isTTY;
-  return ora({ text, isEnabled: isInteractive });
-}
-
 import { program } from "commander";
 import { generateCommitMessage, generatePullRequestDetails } from "./generate";
-import { createPR } from "./createPR";
 import {
   hasStagedChanges,
   commitChanges,
   pushBranch,
   getCurrentBranch,
 } from "./gitUtils";
+import { createPR } from "./ghUtils";
+
+// Helper function to safely initialize ora spinner
+function createSafeSpinner(text: string) {
+  const isInteractive = process.stdout && process.stdout.isTTY;
+  return ora({ text, isEnabled: isInteractive });
+}
 
 dotenv.config();
 
