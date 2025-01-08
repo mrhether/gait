@@ -6,12 +6,11 @@ import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 
 export const PULL_REQUEST_OUTPUT_FORMAT = `
-**Summary:**
+## Summary
 - <bullet point summary of major changes>
 - <optional bullet point for additional context if necessary>
-**Caveats:**
-<list of any caveats or limitations>
-**Testing:**
+
+## How to Test
 - <describe how the changes can be tested or verified for correctness, if needed>
 `;
 
