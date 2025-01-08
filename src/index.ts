@@ -16,12 +16,6 @@ import {
 } from "./gitUtils";
 import { createPR } from "./ghUtils";
 
-// Helper function to safely initialize ora spinner
-function createSafeSpinner(text: string) {
-  const isInteractive = process.stdout && process.stdout.isTTY;
-  return ora({ text, isEnabled: isInteractive });
-}
-
 dotenv.config();
 
 // Helper function to handle staging and committing changes
@@ -30,7 +24,7 @@ async function handleCommit(
   commitArgs: string[] = []
 ): Promise<void> {
   if (hasStagedChanges()) {
-    const spinner = createSafeSpinner(
+    const spinner = ora(
       "Staged changes detected. Generating commit message..."
     ).start();
 
@@ -96,9 +90,7 @@ async function handlePushAndPR(options: any) {
   // Determine the default branch dynamically
   const defaultBranch = getDefaultBranch();
   const branchName = options.branch || getCurrentBranch();
-  const spinner = createSafeSpinner(
-    `Pushing branch ${chalk.blue(branchName)}...`
-  ).start();
+  const spinner = ora(`Pushing branch ${chalk.blue(branchName)}...`).start();
 
   try {
     pushBranch(branchName);
@@ -130,8 +122,8 @@ const trycatch = async (fn: Function) => {
 };
 
 program
-  .name("gait")
-  .command("commit")
+  .command("c")
+  .alias("commit")
   .description("Stage changes, generate a commit message, and commit.")
   .allowExcessArguments() // Allow passing unknown options to the command
   .allowUnknownOption()
