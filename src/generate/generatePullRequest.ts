@@ -98,14 +98,21 @@ export async function generatePullRequestDetails(base: string) {
   for await (const chunk of response) {
     if (chunk.choices?.[0]?.delta?.content) {
       content += chunk.choices[0].delta.content;
-      spinner.text = `Generating pull request details... (${content.length} characters)`;
+      spinner.text = `Generating pull request details... \n${content}`;
     }
   }
-  spinner.succeed(chalk.green("Pull request details generated successfully!"));
 
   const parsedContent = Result.safeParse(JSON.parse(content));
   if (!parsedContent.success) {
     throw new Error("Could not generate structured pull request details.");
   }
+  spinner.succeed(
+    chalk.green(
+      "Pull request: " +
+        parsedContent.data.title +
+        "\n" +
+        parsedContent.data.summary
+    )
+  );
   return parsedContent.data;
 }
