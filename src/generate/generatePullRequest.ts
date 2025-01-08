@@ -52,6 +52,13 @@ Generate a high-quality pull request title and summary adhering to the following
 
 Title:
 1. Write a short, actionable title in active voice (under 65 characters).
+2. Start with the correct Types and Emojis
+- 🔧 fix: bug fixes
+- ✨ feat: new features
+- 🔄 refactor: code improvements
+- 📚 docs: documentation updates
+- 🧪 test: test-related changes
+- 📦 chore: other minor changes
 
 Summary:
 2. Summarize what has been changed and why, focusing on key improvements or fixes (under 300 characters).

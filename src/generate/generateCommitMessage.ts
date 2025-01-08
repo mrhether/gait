@@ -3,6 +3,17 @@ import { getClient } from "./aiClient";
 
 export const COMMIT_MESSAGE_OUTPUT_FORMAT = `
 <emoji> <concise description of change>
+
+### Types and Emojis
+- 🔧 fix: bug fixes
+- ✨ feat: new features
+- 🔄 refactor: code improvements
+- 📚 docs: documentation updates
+- 🧪 test: test-related changes
+- 📦 chore: other minor changes
+
+### Example
+🔧 Resolve issue with authentication middleware
 `;
 
 // Helper function to generate the commit message prompt
@@ -17,17 +28,6 @@ Generate a short, high-quality git commit message from the following changes. Th
 
 ### Output Format
 ${COMMIT_MESSAGE_OUTPUT_FORMAT}
-
-### Types and Emojis
-- 🔧 fix: bug fixes
-- ✨ feat: new features
-- 🔄 refactor: code improvements
-- 📚 docs: documentation updates
-- 🧪 test: test-related changes
-- 📦 chore: other minor changes
-
-### Example
-🔧 resolve issue with authentication middleware
 
 ### Changes
 ${stagedDiff}
