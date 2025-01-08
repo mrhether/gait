@@ -71,16 +71,15 @@ function generatePullRequestPrompt(stagedDiff: string): string {
 ### Instruction
 Generate a high-quality pull request title and summary using the following principles:
 1. The title should be short, actionable, and written in active voice (under 65 characters).
-2. The summary should explain what has been changed and why, focusing on the key improvements or bug fixes.
+2. The summary should explain what has been changed and why, focusing on the key improvements or bug fixes. IT MUST FOLLOW THE TEMPLATE BELOW.
 3. Ensure content is easy to read with proper formatting.
-4. If there are limitations or follow-up actions required, include them under "Caveats".
 5. Use Markdown formatting for the Summary 
 
 ### Output Format
 { "title": "<pull request title>",
- "summary": <Summary>
+ "summary": <SummaryTemplate>
     ${pullRequestTemplate}
-  </Summary> 
+  </SummaryTemplate> 
 }
 
 ### Changes
