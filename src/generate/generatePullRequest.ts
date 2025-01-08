@@ -64,7 +64,9 @@ export async function generatePullRequestDetails(baseBranch: string = "main") {
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  const stagedDiff = execSync(`git diff origin/${baseBranch}...HEAD`)
+  const stagedDiff = execSync(
+    `git diff origin/${baseBranch}...HEAD -- . ':!package-lock.json'`
+  )
     .toString()
     .trim();
 

@@ -39,7 +39,9 @@ export async function generateCommitMessage(): Promise<string> {
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  const stagedDiff = execSync(`git diff --staged`).toString();
+  const stagedDiff = execSync(
+    `git diff --staged -- . ':!package-lock.json'`
+  ).toString();
 
   if (!stagedDiff) {
     throw new Error("No staged changes to generate a commit message.");
