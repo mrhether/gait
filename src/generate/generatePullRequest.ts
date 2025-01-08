@@ -62,10 +62,8 @@ Summary:
 ## Output Format
 \`\`\`
 {
-  "title": "<Title>",
-  "summary": "<SummaryTemplate>
-    ${pullRequestTemplate}
-  </SummaryTemplate>"
+  "title": "Title",
+  "summary": "${pullRequestTemplate}"
 }
 \`\`\`
 
