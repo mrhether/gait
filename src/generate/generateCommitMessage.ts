@@ -1,6 +1,9 @@
 import { execSync } from "child_process";
 import { OpenAI } from "openai";
 
+const token = process.env["GITHUB_TOKEN"];
+const endpoint = "https://models.inference.ai.azure.com";
+
 export const COMMIT_MESSAGE_OUTPUT_FORMAT = `
 <emoji> <concise description of change>
 `;
@@ -34,10 +37,15 @@ ${stagedDiff}
   `;
 }
 
+const getClient = () => {
+  if (token) {
+    return new OpenAI({ apiKey: token, baseURL: endpoint });
+  }
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+};
+
 export async function generateCommitMessage(): Promise<string> {
-  const client = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+  const client = getClient();
 
   const stagedDiff = execSync(
     `git diff --staged -- . ':!package-lock.json'`
