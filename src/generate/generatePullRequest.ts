@@ -79,10 +79,8 @@ export async function generatePullRequestDetails(base: string) {
     );
     diff = diff.slice(0, 10000);
   }
-  console.log("Diff:", diff.length);
 
   const prompt = generatePullRequestPrompt(diff);
-
   const response = await client.beta.chat.completions.parse({
     model: "gpt-4o-mini",
     messages: [{ role: "system", content: prompt }],
