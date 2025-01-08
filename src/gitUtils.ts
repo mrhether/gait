@@ -38,7 +38,6 @@ export function getDefaultBranch(): string {
 // Utility to list unstaged/untracked files
 export function getUnstagedFiles(): string[] {
   const output = execSync("git status --porcelain").toString().trim();
-  console.log(output, output.split("\n"));
   const files = output
     .split("\n")
     .filter(

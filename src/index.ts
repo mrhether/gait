@@ -51,7 +51,6 @@ async function handleCommit(
     }
   } else {
     const unstagedFiles = getUnstagedFiles();
-    console.log(unstagedFiles);
     if (unstagedFiles.length > 0) {
       console.log(
         chalk.yellow(
