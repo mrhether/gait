@@ -53,8 +53,10 @@ export async function generatePullRequestDetails(baseBranch: string = "main") {
   }
 
   const prompt = `Generate a concise pull request title and summary in based on the following changes in the following format.
+  Format:\n\n${prSummaryTemplate}
+  \n\n\n\n
   Changes:\n\n${stagedDiff}
-  Format:\n\n${prSummaryTemplate}`;
+    `;
 
   const response = await client.beta.chat.completions.parse({
     model: "gpt-4o-mini",
