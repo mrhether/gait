@@ -1,11 +1,11 @@
 import { execSync } from "child_process";
-import { OpenAI } from "openai";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { z } from "zod";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 import chalk from "chalk";
 import ora from "ora";
+import { getClient as openAI } from "./aiClient";
 
 const DEFAULT_PULL_REQUEST_TEMPLATE_PATH = ".github/PULL_REQUEST_TEMPLATE.md";
 const MAX_DIFF_LENGTH = 10000;
@@ -80,7 +80,7 @@ const Result = z.object({
 export async function generatePullRequestDetails(
   baseBranch: string
 ): Promise<{ title: string; summary: string }> {
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const client = openAI();
 
   const branchWithOrigin = baseBranch.startsWith("origin")
     ? baseBranch
