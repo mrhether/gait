@@ -4,18 +4,20 @@ import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { z } from "zod";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
-import chalk from "chalk"; // Import chalk
+import chalk from "chalk";
 import ora from "ora";
 
 const DEFAULT_PULL_REQUEST_TEMPLATE_PATH = ".github/PULL_REQUEST_TEMPLATE.md";
+const MAX_DIFF_LENGTH = 10000;
+const MAX_TOKENS = 6000;
 
 export const PULL_REQUEST_OUTPUT_FORMAT = `
 ## Summary
-- <bullet point summary of major changes>
-- <optional bullet point for additional context if necessary>
+- Briefly summarize major changes.
+- Include optional context if necessary.
 
 ## How to Test
-- <describe how the changes can be tested or verified for correctness, if needed>
+- Provide clear steps to verify correctness.
 `;
 
 function getPullRequestTemplate(): string {
@@ -32,33 +34,44 @@ function getPullRequestTemplate(): string {
   return PULL_REQUEST_OUTPUT_FORMAT;
 }
 
-// Helper function to generate the pull request prompt
-function generatePullRequestPrompt(stagedDiff: string): string {
+function truncateDiff(diff: string): string {
+  if (diff.length > MAX_DIFF_LENGTH) {
+    console.warn(
+      chalk.yellow("Diff is too large, truncating to 10,000 characters.")
+    );
+    return diff.slice(0, MAX_DIFF_LENGTH) + "\n\n[...diff truncated]";
+  }
+  return diff;
+}
+
+function generatePullRequestPrompt(diff: string): string {
   const pullRequestTemplate = getPullRequestTemplate();
 
   return `
-Generate a high-quality pull request title and summary using the following principles:
+Generate a high-quality pull request title and summary adhering to the following guidelines:
+
 Title:
-1. The title should be short, actionable, and written in active voice (under 65 characters).
+1. Write a short, actionable title in active voice (under 65 characters).
+
 Summary:
-2. Should explain what has been changed and why, focusing on the key improvements or bug fixes (under 300 characters).
-3. *IT MUST FOLLOW THE TEMPLATE* in Output Format.
-4. Ensure content is easy to read with proper formatting.
-5. Use Markdown formatting for the Summary
-6. Don't include more than 1 lines of blank space between sections.
+2. Summarize what has been changed and why, focusing on key improvements or fixes (under 300 characters).
+3. Follow the exact format provided in the template below.
+4. Use Markdown formatting for clarity.
+5. Avoid excessive blank lines.
 
 ## Output Format
 \`\`\`
-{ "title": "<Title>",
- "summary": <SummaryTemplate>
+{
+  "title": "<Title>",
+  "summary": "<SummaryTemplate>
     ${pullRequestTemplate}
-  </SummaryTemplate>
+  </SummaryTemplate>"
 }
 \`\`\`
 
-## This is the diff of the changes: 
-${stagedDiff}
-  `;
+## Diff of changes:
+${diff}
+`;
 }
 
 const Result = z.object({
@@ -66,58 +79,71 @@ const Result = z.object({
   summary: z.string(),
 });
 
-export async function generatePullRequestDetails(base: string) {
-  const client = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+export async function generatePullRequestDetails(
+  baseBranch: string
+): Promise<{ title: string; summary: string }> {
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  const branchWithOrigin = base.includes("origin") ? base : `origin/${base}`;
-  let diff = execSync(
-    `git diff ${branchWithOrigin}...HEAD -- . ':!package-lock.json'`
-  ).toString();
+  const branchWithOrigin = baseBranch.startsWith("origin")
+    ? baseBranch
+    : `origin/${baseBranch}`;
+
+  let diff;
+  try {
+    diff = execSync(
+      `git diff ${branchWithOrigin}...HEAD -- . ':!package-lock.json'`
+    ).toString();
+  } catch (error) {
+    throw new Error(
+      "Failed to generate git diff. Ensure the branch name is correct."
+    );
+  }
 
   if (!diff) {
-    throw new Error("No changes to generate pull request details.");
+    throw new Error("No changes detected to generate pull request details.");
   }
 
-  if (diff.length > 10000) {
-    console.warn(
-      "Warning: The diff is too large to process... truncating to 10,000 characters."
-    );
-    diff = diff.slice(0, 10000);
-  }
+  const truncatedDiff = truncateDiff(diff);
+  const prompt = generatePullRequestPrompt(truncatedDiff);
 
-  const prompt = generatePullRequestPrompt(diff);
   const response = await client.beta.chat.completions.stream({
     model: "gpt-4o-mini",
     messages: [{ role: "system", content: prompt }],
     response_format: zodResponseFormat(Result, "output"),
-    stream: true, // Enable streaming
-    max_tokens: 10000,
+    stream: true,
+    max_tokens: MAX_TOKENS,
   });
 
   let content = "";
   const spinner = ora(
     chalk.green("Generating pull request details...")
   ).start();
+
   for await (const chunk of response) {
     if (chunk.choices?.[0]?.delta?.content) {
       content += chunk.choices[0].delta.content;
-      spinner.text = `Generating pull request details...(${content.length}) \n${content.trim()}`;
+      spinner.text = `Generating pull request details... (${content.length} characters)\n ${chalk.gray(content.trim())}`;
     }
   }
 
-  const parsedContent = Result.safeParse(JSON.parse(content));
-  if (!parsedContent.success) {
-    throw new Error("Could not generate structured pull request details.");
+  spinner.stop();
+
+  try {
+    const parsedContent = Result.safeParse(JSON.parse(content));
+    if (!parsedContent.success) {
+      throw new Error("Invalid pull request details generated.");
+    }
+
+    spinner.succeed(
+      chalk.green(
+        "Pull Request Details:\n" +
+          chalk.bold(parsedContent.data.title) +
+          "\n" +
+          parsedContent.data.summary
+      )
+    );
+    return parsedContent.data;
+  } catch (error: any) {
+    throw new Error("Failed to parse pull request details: " + error.message);
   }
-  spinner.succeed(
-    chalk.green(
-      "Pull request: " +
-        parsedContent.data.title +
-        "\n" +
-        parsedContent.data.summary
-    )
-  );
-  return parsedContent.data;
 }

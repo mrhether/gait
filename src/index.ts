@@ -57,7 +57,7 @@ async function handleCommit(
           type: "confirm",
           name: "addFiles",
           message: chalk.green("Would you like to add these files?"),
-          default: false,
+          default: true,
         },
       ]);
 
