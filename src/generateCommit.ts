@@ -15,14 +15,12 @@ const prSummaryTemplate = `
 {testing}
 `;
 
-export async function generateCommitMessage(
-  baseBranch: string = "main"
-): Promise<string> {
+export async function generateCommitMessage(): Promise<string> {
   const client = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  const stagedDiff = execSync(`git diff ${baseBranch}... --staged`).toString();
+  const stagedDiff = execSync(`git diff --staged`).toString();
 
   if (!stagedDiff) {
     throw new Error("No staged changes to generate a commit message.");
@@ -48,7 +46,7 @@ export async function generatePullRequestDetails(baseBranch: string = "main") {
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  const stagedDiff = execSync(`git diff ${baseBranch}... --staged`).toString();
+  const stagedDiff = execSync(`git diff ${baseBranch}...HEAD`).toString();
 
   if (!stagedDiff) {
     throw new Error("No changes to generate pull request details.");
@@ -61,7 +59,7 @@ export async function generatePullRequestDetails(baseBranch: string = "main") {
   const response = await client.beta.chat.completions.parse({
     model: "gpt-4o-mini",
     messages: [{ role: "system", content: prompt }],
-    max_tokens: 300,
+    max_tokens: 1000,
     response_format: zodResponseFormat(Result, "pull_request_details"),
   });
 
