@@ -72,12 +72,10 @@ ${diff}
 
 
 As a reminder, you must return JSON data with the following format:
-\`\`\`
 {
   "title": "Title",
   "summary": "Summary"
 }
-\`\`\
 `;
 }
 
