@@ -5,6 +5,7 @@ import { z } from "zod";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
 import chalk from "chalk"; // Import chalk
+import ora from "ora";
 
 const DEFAULT_PULL_REQUEST_TEMPLATE_PATH = ".github/PULL_REQUEST_TEMPLATE.md";
 
@@ -91,18 +92,27 @@ export async function generatePullRequestDetails(base: string) {
   });
 
   let content = "";
-  process.stdout.write(chalk.green("Generating pull request details...\n"));
+  const spinner = ora(
+    chalk.green("Generating pull request details...")
+  ).start();
   for await (const chunk of response) {
     if (chunk.choices?.[0]?.delta?.content) {
-      process.stdout.write(chalk.green(chunk.choices[0].delta.content));
       content += chunk.choices[0].delta.content;
+      spinner.text = `Generating pull request details... \n${content}`;
     }
   }
-  process.stdout.write(chalk.green("\nGeneration complete.\n"));
 
   const parsedContent = Result.safeParse(JSON.parse(content));
   if (!parsedContent.success) {
     throw new Error("Could not generate structured pull request details.");
   }
+  spinner.succeed(
+    chalk.green(
+      "Pull request: " +
+        parsedContent.data.title +
+        "\n" +
+        parsedContent.data.summary
+    )
+  );
   return parsedContent.data;
 }
