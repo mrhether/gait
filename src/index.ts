@@ -9,6 +9,7 @@ import {
   commitChanges,
   pushBranch,
   getCurrentBranch,
+  getDefaultBranch,
 } from "./gitUtils";
 import { createPR } from "./ghUtils";
 
@@ -52,6 +53,8 @@ async function handleCommit(): Promise<void> {
 }
 
 async function handlePushAndPR(options: any) {
+  // Determine the default branch dynamically
+  const defaultBranch = getDefaultBranch();
   const branchName = options.branch || getCurrentBranch();
   const spinner = createSafeSpinner(
     `Pushing branch ${chalk.blue(branchName)}...`
@@ -71,6 +74,7 @@ async function handlePushAndPR(options: any) {
     spinner.start(`Creating Pull Request: ${chalk.blue(prInfo.title)}...`);
     await createPR({
       branch: branchName,
+      base: defaultBranch, // Use the detected default branch
       title: prInfo.title,
       summary: prInfo.summary,
     });

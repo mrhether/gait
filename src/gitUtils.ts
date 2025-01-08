@@ -16,3 +16,22 @@ export function pushBranch(branch: string): void {
 export function getCurrentBranch(): string {
   return execSync("git rev-parse --abbrev-ref HEAD").toString().trim();
 }
+
+export function getDefaultBranch(): string {
+  try {
+    // Check if `main` exists
+    const branches = execSync("git branch -r").toString().trim();
+    if (branches.includes("origin/main")) {
+      return "main";
+    }
+    // Fallback to `master` if `main` is not found
+    if (branches.includes("origin/master")) {
+      return "master";
+    }
+    // Default to `main` if neither is detected (safe assumption for new repositories)
+    return "main";
+  } catch (error) {
+    console.error("Error determining default branch:", error);
+    return "main"; // Fallback to `main` in case of an error
+  }
+}
