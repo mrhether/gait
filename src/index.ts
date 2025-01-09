@@ -86,10 +86,10 @@ async function handleCommit(
   }
 }
 
-async function handlePushAndPR(options: any) {
+async function handlePushAndPR(options: { branch?: string; base?: string }) {
   // Determine the default branch dynamically
-  const defaultBranch = getDefaultBranch();
   const branchName = options.branch || getCurrentBranch();
+  const baseBranch = options.base || getDefaultBranch();
   const spinner = ora(`Pushing branch ${chalk.blue(branchName)}...`).start();
 
   try {
@@ -97,12 +97,12 @@ async function handlePushAndPR(options: any) {
     spinner.succeed(chalk.green(`Branch ${branchName} pushed successfully!`));
 
     // Generate and create pull request
-    const prInfo = await generatePullRequestDetails(defaultBranch);
+    const prInfo = await generatePullRequestDetails(baseBranch);
 
     spinner.start(`Creating/Updating Pull Request:...`);
     const action = await createPR({
       branch: branchName,
-      base: defaultBranch,
+      base: baseBranch,
       title: prInfo.title,
       summary: prInfo.summary,
     });
@@ -134,12 +134,13 @@ program
 program
   .command("pr")
   .alias("pull-request")
-  .option("-b, --branch <branch>", "Branch name")
+  .option("--branch <branch>", "Branch name")
+  .option("--base <base>", "Base branch")
   .allowExcessArguments()
   .action(async (_, b) => {
     await trycatch(async () => {
       await handleCommit(false, b.args);
-      await handlePushAndPR(b.args);
+      await handlePushAndPR({ base: b.opts().base });
     });
   });
 

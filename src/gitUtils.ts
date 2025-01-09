@@ -17,7 +17,10 @@ export function getCurrentBranch(): string {
   return execSync("git rev-parse --abbrev-ref HEAD").toString().trim();
 }
 
-export function getDefaultBranch(): string {
+export function getDefaultBranch(baseBranch?: string): string {
+  if (baseBranch) {
+    return baseBranch;
+  }
   try {
     // Check if `main` exists
     const branches = execSync("git branch -r").toString().trim();
